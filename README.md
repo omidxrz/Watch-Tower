@@ -1,6 +1,18 @@
 # Watch Tower
 Simple Python Script for Tracking Bug Bounty Programs.
 
+This script collects data from this [Repository](https://github.com/Osb0rn3/bugbounty-targets) This script collects data from this repository and sends us a notification if it changes.
+
+Types Of Notification Supported: 
+- New Program.
+- Change Program From RDP To VDP. 
+- Change Program From VDP To RDP. 
+- New Targets.
+- Add Target Into The Scope.
+- Delete Target From Scope. 
+
+
+
 ## Install
 1. Download or clone this GitHub repo
 ```
