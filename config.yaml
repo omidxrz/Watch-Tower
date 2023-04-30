@@ -1,0 +1,16 @@
+watchVersion: v1
+
+Database:
+  - '127.0.0.1'
+  - '5432'
+  - 'watch'
+  - 'postgres'
+  - 'postgres'
+
+Discord:
+  - 'https://discord.com/api/webhooks/xx'
+  # - 'https://discord.com/api/webhooks/xx'
+
+# Telegram:
+#   - 'xx'
+#   - 'xx:xx'
