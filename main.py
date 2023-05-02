@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import yaml, os, psycopg2, requests
+import yaml, os, psycopg2, requests, sys
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 # https://twitter.com/omidxrz
@@ -11,7 +11,7 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 
 # Read Config 
 def Config():
-    ConfigFile = os.getcwd() + '/config.yaml'
+    ConfigFile = os.path.dirname(os.path.abspath(__file__)) + '/config.yaml'
     if not os.path.exists(ConfigFile):
         print('[-] Error: ConfigNotFound.')
         sys.exit()
