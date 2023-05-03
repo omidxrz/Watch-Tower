@@ -52,29 +52,36 @@ def CreateTables():
         query.execute("alter table targets add constraint fk_target foreign key (program_id) REFERENCES programs (id);")
 
     except Exception as err:
-        print(f"[+] Info: {err}",end='')
+        print(f"[+] Info: {err}")
         return
     query.close()
     print("[+] Tables Created.")
 
 # Send To Discord Function 
-def discord(title, description):
-
-    # print(Name)
+def discord(data):
     channels = config['Discord']
     for Channel in channels:
-        webhook = DiscordWebhook(
-            url= Channel,
-            rate_limit_retry=True)
-        embed = DiscordEmbed(
-            title=title,
-            description=description,
-            color='65535')
+        webhook = DiscordWebhook( url= Channel, rate_limit_retry=True)
+        embed = DiscordEmbed(title=data['Title'], color='65535')
+        embed.set_timestamp()
+        try:
+            embed.add_embed_field(name='Target', value=data['Target'], inline=False)
+        except:
+            pass
+        try:
+            embed.add_embed_field(name='Type', value=data['Type'], inline=False)
+        except:
+            pass
+        embed.add_embed_field(name='Program', value=data['Program'], inline=False)
+        embed.add_embed_field(name='Bounty', value=data['Bounty'], inline=False)
+        embed.add_embed_field(name='Platform', value=data['Platform'], inline=False)
+        embed.add_embed_field(name='Submission', value=data['Submission'], inline=False)
+        embed.set_thumbnail(url=data['Logo'])
         webhook.add_embed(embed)
         response = webhook.execute()
 
 
-def ChcekPrograms(Name, Submission, Platform, Bounty):
+def ChcekPrograms(Name, Submission, Platform, Bounty, Logo):
     conn = database()
     select_query = conn.cursor()
     try:
@@ -88,6 +95,7 @@ def ChcekPrograms(Name, Submission, Platform, Bounty):
     # Insert to Database
     # ChangeTitle = ""
     fetch = select_query.fetchone()
+    data = {}
     if fetch == None:
         try:
             insert_query = conn.cursor()
@@ -95,36 +103,55 @@ def ChcekPrograms(Name, Submission, Platform, Bounty):
             conn.commit() 
             id = insert_query.fetchone()[0]
             insert_query.close()
-            ChangeTitle = f"[+] New Program"
-            description = f'**Program: **{Name}\n**Submission: **{Submission}\n**Bounty: **{Bounty}\n**Platform:** {Platform}\n'
-            discord(title=ChangeTitle ,description=description)
-            print(f"[+] {ChangeTitle}: {Name}")
+            # data = {}
+            data.update({'Title': f'[+] New Program'})
+            data.update({'Program': f'{Name}'})
+            data.update({'Platform': f'{Platform}'})
+            data.update({'Bounty': f'{Bounty}'})
+            data.update({'Submission': f'{Submission}'})
+            data.update({'Logo': f'{Logo}'})
+            if Bounty == True:
+                discord(data)
+            print(f"[+] {data['Title']}: {Name}")
         except Exception as err:
             print(f"Error: {err}");return
 
     else:
+        # data = {}
         if (fetch[4] == False and Bounty == True):
-            ChangeTitle = "[+] Change Program From VDP To BBP"
-            description = f'**Program: **{Name}\n**Submission: **{Submission}\n**Bounty: **{Bounty}\n**Platform:** {Platform}\n'
-            discord(title=ChangeTitle ,description=description)
-            print(f"[+] {ChangeTitle}: {Name}")
+
+            data.update({'Title': f'[+] Change Program From VDP To BBP'})
+            data.update({'Program': f'{Name}'})
+            data.update({'Platform': f'{Platform}'})
+            data.update({'Bounty': f'{Bounty}'})
+            data.update({'Submission': f'{Submission}'})
+            data.update({'Logo': f'{Logo}'})
+            discord(data)
+            print(f"[+] {data['Title']}: {Name}")
+        
         elif (fetch[4] == True and Bounty == False):
-            ChangeTitle = "[-] Change Program From BBP To VDP"
-            description = f'**Program: **{Name}\n**Submission: **{Submission}\n**Bounty: **{Bounty}\n**Platform:** {Platform}\n'
-            discord(title=ChangeTitle ,description=description)
-            print(f"[+] {ChangeTitle}: {Name}")
-        update_query = conn.cursor()
+
+            # data = {}
+            data.update({'Title': f'[-] Change Program From BBP To VDP'})
+            data.update({'Program': f'{Name}'})
+            data.update({'Platform': f'{Platform}'})
+            data.update({'Bounty': f'{Bounty}'})
+            data.update({'Submission': f'{Submission}'})
+            data.update({'Logo': f'{Logo}'})
+            discord(data)
+            print(f"[+] {data['Title']}: {Name}")
+        
         try:
+            update_query = conn.cursor()
             update_query.execute("UPDATE Programs SET bounty = %s WHERE id = %s;", (Bounty, fetch[0]))
             conn.commit()
             id = fetch[0]
             update_query.close()
-            
         except Exception as err:
             print(f"Error: {err}");return
     return id
 
-def CheckTargets(Title, Type, Scope, PK):
+def CheckTargets(Title, Type, Scope, PK, Logo):
     # print(Title)
     conn = database()
     select_query = conn.cursor()
@@ -137,31 +164,42 @@ def CheckTargets(Title, Type, Scope, PK):
         return 
     
     fetch = select_query.fetchone()
+    # data = {}
     if fetch == None:
-        # print(Title, Type, Scope, PK)
+
         # If Exist 
         try:
+
             # Add into Database
             insert_query = conn.cursor()
             insert_query.execute("INSERT INTO targets(name, type, scope, program_id)VALUES(%s, %s, %s, %s) returning id ;", (Title, Type, Scope, PK))
             conn.commit() 
-            # id = insert_query.fetchone()[0]
+            id = insert_query.fetchone()[0]
             insert_query.close()
 
             # Get Program Name & Submission
-
             getProgram = conn.cursor()
             getProgram.execute("SELECT * FROM Programs WHERE id=%s ;", (PK,))
             ProgramsDetails = getProgram.fetchone()
             conn.commit()
             getProgram.close()
-            ChangeTitle = "[+] New Target"
-            description = f'**Target: **{Title}\n**Type: **{Type}\n**Scope: **{Scope}\n**Bounty:** {ProgramsDetails[4]}\n**Platform:** {ProgramsDetails[2]}\n**Program:** {ProgramsDetails[3]}'
 
             # Send To Discord
-            discord(title=ChangeTitle ,description=description)
-            
-            print(f"[+] {ChangeTitle}: {Title}")
+            if Scope == True:
+                data = {}
+                data.update({'Title': f'[+] New Scope.'})
+                data.update({'Target': f'{Title}'})
+                data.update({'Type': f'{Type}'})
+                data.update({'InScope': f'{Scope}'})
+                data.update({'Program': f'{ProgramsDetails[1]}'})
+                data.update({'Bounty': f'{ProgramsDetails[4]}'})
+                data.update({'Platform': f'{ProgramsDetails[2]}'})
+                data.update({'Submission': f'{ProgramsDetails[3]}'})
+                data.update({'Logo': f'{Logo}'})
+                discord(data)  
+            else:
+                pass
+            print(f"[+] New Scope: {Title}")
         except Exception as err:
             print(f"Error: {err}")
             return
@@ -170,22 +208,38 @@ def CheckTargets(Title, Type, Scope, PK):
         try:
             getProgram = conn.cursor()
             getProgram.execute("SELECT * FROM Programs WHERE id=%s ;", (fetch[4],))
-            ProgramsDetail = getProgram.fetchone()
+            ProgramsDetails = getProgram.fetchone()
             getProgram.close()
         except Exception as err :
             print(f"Error: {err}")
-
+        data = {}
         if (fetch[3] == True and Scope == False):
-            ChangeTitle = "[-] Target is out of Scope Now."
-            description = f'**Target: **{Title}\n**Type: **{Type}\n**Scope: **{Scope}\n**Bounty:** {ProgramsDetail[4]}\n**Platform:** {ProgramsDetail[2]}\n**Program:** {ProgramsDetail[3]}'
-            discord(title=ChangeTitle ,description=description)
-            print(f"[+] {ChangeTitle}: {Title}")
+
+            data.update({'Title': f'[-] Target is out of Scope Now'})
+            data.update({'Target': f'{Title}'})
+            data.update({'Type': f'{Type}'})
+            data.update({'InScope': f'{Scope}'})
+            data.update({'Program': f'{ProgramsDetails[1]}'})
+            data.update({'Bounty': f'{ProgramsDetails[4]}'})
+            data.update({'Platform': f'{ProgramsDetails[2]}'})
+            data.update({'Submission': f'{ProgramsDetails[3]}'})
+            data.update({'Logo': f'{Logo}'})
+            discord(data)
+            print(f"[+] {data['Title']}: {Title}")
         
         elif (fetch[3] == False and Scope == True):
-            ChangeTitle = "[+] Target is in Scope Now."
-            description = f'**Target: **{Title}\n**Type: **{Type}\n**Scope: **{Scope}\n**Bounty:** {ProgramsDetail[4]}\n**Platform:** {ProgramsDetail[2]}\n**Program:** {ProgramsDetail[3]}'
-            discord(title=ChangeTitle ,description=description)
-            print(f"[+] {ChangeTitle}: {Title}")
+
+            data.update({'Title': f'[+] Target is in Scope Now'})
+            data.update({'Target': f'{Title}'})
+            data.update({'Type': f'{Type}'})
+            data.update({'InScope': f'{Scope}'})
+            data.update({'Program': f'{ProgramsDetails[1]}'})
+            data.update({'Bounty': f'{ProgramsDetails[4]}'})
+            data.update({'Platform': f'{ProgramsDetails[2]}'})
+            data.update({'Submission': f'{ProgramsDetails[3]}'})
+            data.update({'Logo': f'{Logo}'})
+            discord(data)
+            print(f"[+] {data['Title']}: {Title}")
         # Update Target Changes.
         try:
             update_query = conn.cursor()
@@ -215,9 +269,11 @@ def bugcrowd():
                 Bounty = True
         except:
             Bounty = False
+        Logo = Program['logo']
+        
+        # ProgramData = {}
 
-        PK = ChcekPrograms(Name, Submission, Platform, Bounty)
-
+        PK = ChcekPrograms(Name, Submission, Platform, Bounty, Logo)
         try:
             targets = Program["target_groups"]
             for target in targets:
@@ -227,7 +283,7 @@ def bugcrowd():
                         target_name = asset["name"]
                         type = asset["category"]
                         scope = True
-                        CheckTargets(target_name, type, scope, PK)
+                        CheckTargets(target_name, type, scope, PK, Logo)
                         # return
 
                 elif target["in_scope"] == False:
@@ -236,7 +292,7 @@ def bugcrowd():
                         target_name = asset["name"]
                         type = asset["category"]
                         scope = False
-                        CheckTargets(target_name, type, scope, PK)
+                        CheckTargets(target_name, type, scope, PK, Logo)
                         # return
         except Exception as err:
             print(err)
@@ -246,11 +302,10 @@ def bugcrowd():
 def hackerone():
     HackeroneURL = "https://raw.githubusercontent.com/Osb0rn3/bugbounty-targets/main/programs/hackerone.json"
     Response = requests.request('GET', HackeroneURL)
-    # Hackerone = Response.json()
-    # write_to_file("hackerone_data.json", hackerOne.text)
     for program in Response.json():
         handle = program['attributes']['handle']
         Name = program['attributes']['name']
+        Logo = program['attributes']['profile_picture']
         Submission = f'https://hackerone.com/{handle}'
         SubmissionState = program['attributes']['submission_state']
         Platform = 'hackerone'
@@ -263,7 +318,7 @@ def hackerone():
         else:
             BugBounty = BugBounty
         # print(Name, Submission, Platform, BugBounty)
-        PK = ChcekPrograms(Name, Submission, Platform, BugBounty)
+        PK = ChcekPrograms(Name, Submission, Platform, BugBounty, Logo)
         for target in program['relationships']['structured_scopes']['data']:
             Title = target['attributes']['asset_identifier']
             type = target['attributes']['asset_type']
@@ -271,8 +326,8 @@ def hackerone():
                 Scope = True
             else:
                 Scope = False
-            CheckTargets(Title, type, Scope, PK)
-    print('Hackerone Programs Updated. ✅')
+            CheckTargets(Title, type, Scope, PK, Logo)
+    print('[+] Hackerone Programs Updated. ✅')
 
 
 # def telegram(data):
@@ -282,7 +337,6 @@ def main():
     # Connect To The Database & Create Tables
     database()
     CreateTables()
-    
     
     # Start Parse Bugcrowd
     bugcrowd()
