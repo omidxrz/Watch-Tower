@@ -16,7 +16,7 @@ Types Of Notification Supported:
 ## Install
 1. Download or clone this GitHub repo
 ```
-git clone 
+git clone https://github.com/omidxrz/Watch-Tower
 ```
 2. Install requirements with:
 ```
