@@ -20,7 +20,7 @@ git clone https://github.com/omidxrz/Watch-Tower
 ```
 2. Install requirements with:
 ```
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 ```
 3. Run Postgres With Docker 
 ```
