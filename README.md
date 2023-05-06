@@ -33,10 +33,19 @@ Discord:
   - 'Webhook2'
 ```
 - You Can Add Multi Tokens
-5. Run Main Script 
+5. Run First time With InActive Mode.(It does not send notifications)
 ```
-python3 main.py 
+# inActive Mode
+python3 main.py inactive 
+# Run Active Mode
+python3 main.py  
 ```
+- if you see this error **pg_config executable not found.** then try this :
+```
+apt install libpq-dev
+```
+
+
 ### Crontab 
 1. Give permission to Script
 ```
