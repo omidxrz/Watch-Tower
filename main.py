@@ -24,6 +24,14 @@ def Config():
         return config
 config = Config()
 
+# inActive Mode
+try:
+    if sys.argv[1] == 'inactive':
+        inactive = True
+except:
+    inactive = False
+print(f'[+] inActive Mode : {inactive}')
+
 
 
 # Database Function
@@ -112,7 +120,7 @@ def ChcekPrograms(Name, Submission, Platform, Bounty, Logo):
             data.update({'Submission': f'{Submission}'})
             data.update({'Logo': f'{Logo}'})
             if Bounty == True:
-                if not sys.argv[1] == 'inactive': discord(data)
+                if not inactive: discord(data)
                 # discord(data)
             print(f"[+] {data['Title']}: {Name}")
         except Exception as err:
@@ -128,7 +136,7 @@ def ChcekPrograms(Name, Submission, Platform, Bounty, Logo):
             data.update({'Bounty': f'{Bounty}'})
             data.update({'Submission': f'{Submission}'})
             data.update({'Logo': f'{Logo}'})
-            if not sys.argv[1] == 'inactive': discord(data)
+            if not inactive: discord(data)
             # discord(data)
             print(f"[+] {data['Title']}: {Name}")
         
@@ -141,7 +149,7 @@ def ChcekPrograms(Name, Submission, Platform, Bounty, Logo):
             data.update({'Bounty': f'{Bounty}'})
             data.update({'Submission': f'{Submission}'})
             data.update({'Logo': f'{Logo}'})
-            if not sys.argv[1] == 'inactive': discord(data)
+            if not inactive: discord(data)
             # discord(data)
             print(f"[+] {data['Title']}: {Name}")
         
@@ -200,7 +208,7 @@ def CheckTargets(Title, Type, Scope, PK, Logo):
                 data.update({'Platform': f'{ProgramsDetails[2]}'})
                 data.update({'Submission': f'{ProgramsDetails[3]}'})
                 data.update({'Logo': f'{Logo}'})
-                if not sys.argv[1] == 'inactive': discord(data)  
+                if not inactive: discord(data) 
             else:
                 pass
             print(f"[+] New Scope: {Title}")
@@ -228,7 +236,7 @@ def CheckTargets(Title, Type, Scope, PK, Logo):
             data.update({'Platform': f'{ProgramsDetails[2]}'})
             data.update({'Submission': f'{ProgramsDetails[3]}'})
             data.update({'Logo': f'{Logo}'})
-            if not sys.argv[1] == 'inactive': discord(data)
+            if not inactive: discord(data)
             print(f"[+] {data['Title']}: {Title}")
         
         elif (fetch[3] == False and Scope == True):
@@ -242,7 +250,7 @@ def CheckTargets(Title, Type, Scope, PK, Logo):
             data.update({'Platform': f'{ProgramsDetails[2]}'})
             data.update({'Submission': f'{ProgramsDetails[3]}'})
             data.update({'Logo': f'{Logo}'})
-            if not sys.argv[1] == 'inactive': discord(data)
+            if not inactive: discord(data)
             # discord(data)
             print(f"[+] {data['Title']}: {Title}")
         # Update Target Changes.
@@ -340,8 +348,7 @@ def hackerone():
 
 def main():
     # Connect To The Database & Create Tables
-    if sys.argv[1] == 'inactive':
-        print("[+] Run InActive Mode.")
+
     database()
     CreateTables()
     
