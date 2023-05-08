@@ -5,10 +5,12 @@ services:
     restart: always
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=mDc20n0#!kT&
+
+    # expose: 
+    #   - "5432"
     ports:
-      - '5432'
+      - "5432:5432"
+     
     volumes: 
-          # - ./postgres-data:/var/lib/postgresql/data
-          # copy the sql script to create tables
           - ./init.sql:/docker-entrypoint-initdb.d/init.sql
