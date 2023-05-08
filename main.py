@@ -62,8 +62,8 @@ def CreateTables():
 
     except Exception as err:
         print(f"[+] Info: {err}")
-        return
     query.close()
+    conn.close()
     print("[+] Tables Created.")
 
 # Send To Discord Function 
@@ -90,7 +90,7 @@ def discord(data):
         response = webhook.execute()
 
 
-def ChcekPrograms(Name, Submission, Platform, Bounty, Logo):
+def CheckPrograms(Name, Submission, Platform, Bounty, Logo):
     conn = database()
     select_query = conn.cursor()
     try:
@@ -161,6 +161,7 @@ def ChcekPrograms(Name, Submission, Platform, Bounty, Logo):
             update_query.close()
         except Exception as err:
             print(f"Error: {err}");return
+    conn.close()
     return id
 
 def CheckTargets(Title, Type, Scope, PK, Logo):
@@ -261,6 +262,7 @@ def CheckTargets(Title, Type, Scope, PK, Logo):
             update_query.close()
         except Exception as err:
             print(f"Error: {err}");return
+    conn.close()
         
         
 def bugcrowd():
@@ -286,7 +288,7 @@ def bugcrowd():
         
         # ProgramData = {}
 
-        PK = ChcekPrograms(Name, Submission, Platform, Bounty, Logo)
+        PK = CheckPrograms(Name, Submission, Platform, Bounty, Logo)
         try:
             targets = Program["target_groups"]
             for target in targets:
@@ -331,7 +333,7 @@ def hackerone():
         else:
             BugBounty = BugBounty
         # print(Name, Submission, Platform, BugBounty)
-        PK = ChcekPrograms(Name, Submission, Platform, BugBounty, Logo)
+        PK = CheckPrograms(Name, Submission, Platform, BugBounty, Logo)
         for target in program['relationships']['structured_scopes']['data']:
             Title = target['attributes']['asset_identifier']
             type = target['attributes']['asset_type']
